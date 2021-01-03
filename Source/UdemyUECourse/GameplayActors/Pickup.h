@@ -17,6 +17,9 @@ class UDEMYUECOURSE_API APickup : public AItem
 public:
     APickup();
     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Coins")
+    int32 CoinCount;
+    
     /** When we're overriding functions that were marked UFUNCTION() in the parent class we don't need to use this macro here
      it is inherited */
     

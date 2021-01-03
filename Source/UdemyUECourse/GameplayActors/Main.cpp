@@ -49,6 +49,14 @@ AMain::AMain()
     GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f); // ... at this rotation rate
     GetCharacterMovement()->JumpZVelocity = 650.f;
     GetCharacterMovement()->AirControl = 0.1f;
+    
+    
+
+    MaxHealth = 100.f;
+    Health = 65.f;
+    MaxStamina = 350.f;
+    Stamina = 120.f;
+    Coins = 0.f;
 }
 
 // Called when the game starts or when spawned
@@ -128,4 +136,24 @@ void AMain::TurnAtRate(float Rate)
 void AMain::LookUpAtRate(float Rate)
 {
     AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AMain::DecrementHealth(float Amount)
+{
+    if (Health - Amount <= 0)
+    {
+        Health -= Amount;
+        Die();
+    }
+    Health -= Amount;
+}
+
+void AMain::IncrementCoins(int32 Amount)
+{
+    Coins += Amount;
+}
+
+void AMain::Die()
+{
+    
 }

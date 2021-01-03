@@ -29,6 +29,28 @@ public:
     
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
     float BaseLookUpRate;
+    
+    /**
+                    Player Stats
+     */
+    
+    /** BlueprintReadWrite makes in possible to edit variables by scripting from blueprints
+     otherwise you can only change them from side menu bar */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+    float MaxHealth;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+    float Health;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Stats")
+    float MaxStamina;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+    float Stamina;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Stats")
+    int32 Coins;
+   
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,6 +77,12 @@ public:
         @param Rate This is a normalized rate, i.e. 1.0 means 100% of desired look up/down rate;
      */
     void LookUpAtRate(float Rate);
+    
+    void DecrementHealth(float Amount);
+    
+    void IncrementCoins(int32 Amount);
+    
+    void Die();
     
     FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
     FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
