@@ -6,6 +6,30 @@
 #include "GameFramework/Character.h"
 #include "Main.generated.h"
 
+/** A macro to make the enum show in blueprints */
+UENUM(BlueprintType)
+enum class EMovementStatus : uint8
+{
+    /** If you make an enum blueprint tyoe you need to use umeta marker to give it a display name */
+    EMS_Normal UMETA(DisplayName = "Normal"), // we use comas rather than semicolon inside enums
+    EMS_Sprinting UMETA(DisplayName = "Sprinting"),
+    
+    /** in enums there often is the last max constant
+     this isn't ment to be used */
+    EMS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
+UENUM(BlueprintType)
+enum class EStaminaStatus : uint8
+{
+    ESS_Normal UMETA(DisplayName = "Normal"),
+    ESS_BelowMinimum UMETA(DisplayName = "BelowMinimum"),
+    ESS_Exhausted UMETA(DisplayName = "Exhausted"),
+    ESS_ExhaustedRecovering UMETA(DisplayName = "ExhaustedRecovering"),
+    
+    ESS_MAX UMETA(DisplayName = "DefaultMax")
+};
+
 UCLASS()
 class UDEMYUECOURSE_API AMain : public ACharacter
 {
@@ -14,6 +38,42 @@ class UDEMYUECOURSE_API AMain : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AMain();
+    
+    TArray<FVector> PickupLocations;
+    
+    void ShowPickupLocations();
+    
+    /** We need a variable to hold the enum properties inside the class so that we can use those in blueprint scropting */
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enums)
+    EMovementStatus MovementStatus;
+    
+    /** Sets movement status and running steed */
+    void SetMovementStatus(EMovementStatus Status);
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Running)
+    float RunningSpeed;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Running)
+    float SprintingSpeed;
+    
+    bool bShiftKeyDown;
+    
+    /** Pressed down to enable sprinting */
+    void ShiftKeyDown();
+    
+    /** Released to stop sprinting */
+    void ShiftKeyUp();
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enums)
+    EStaminaStatus StaminaStatus;
+    
+    FORCEINLINE void SetStaminaStatus(EStaminaStatus Status) { StaminaStatus = Status; }
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+    float StaminaDrainRate;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+    float MinSprintStamina;
     
     /** Camera Boom positioning the camera behind the player */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))

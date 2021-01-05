@@ -15,6 +15,7 @@ void APickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* O
     
     UE_LOG(LogTemp, Warning, TEXT("Pickup::OnOverlapBegin()"));
     
+    /** Other Actor is the actor that overlapped wit h this actor */
     if (OtherActor)
     {
         AMain* Main = Cast<AMain>(OtherActor);
@@ -22,6 +23,7 @@ void APickup::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* O
         if (Main)
         {
             Main->IncrementCoins(CoinCount);
+            Main->PickupLocations.Add(GetActorLocation());
         }
     }
 }

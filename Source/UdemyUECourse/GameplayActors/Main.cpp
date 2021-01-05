@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 AMain::AMain()
@@ -54,9 +55,20 @@ AMain::AMain()
 
     MaxHealth = 100.f;
     Health = 65.f;
-    MaxStamina = 350.f;
+    MaxStamina = 150.f;
     Stamina = 120.f;
     Coins = 0.f;
+    
+    RunningSpeed = 650.f;
+    SprintingSpeed = 950.f;
+    
+    bShiftKeyDown = false;
+    
+    MovementStatus = EMovementStatus::EMS_Normal;
+    StaminaStatus = EStaminaStatus::ESS_Normal;
+    
+    StaminaDrainRate = 25.f;
+    MinSprintStamina = 50.f;
 }
 
 // Called when the game starts or when spawned
@@ -64,13 +76,94 @@ void AMain::BeginPlay()
 {
 	Super::BeginPlay();
 	
+    UKismetSystemLibrary::DrawDebugSphere(this, GetActorLocation() + FVector(0.f, 0.f, 75.f), 25.f, 12, FLinearColor::Red, 10.f, 2.f);
 }
 
 // Called every frame
 void AMain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+    ShowPickupLocations();
 
+    float DeltaStamina = StaminaDrainRate * DeltaTime;
+    
+    switch (StaminaStatus)
+    {
+        case EStaminaStatus::ESS_Normal:
+            if (bShiftKeyDown)
+            {
+                if (Stamina - DeltaStamina <= MinSprintStamina)
+                {
+                    SetStaminaStatus(EStaminaStatus::ESS_BelowMinimum);
+                    Stamina -= DeltaStamina;
+                }
+                else
+                {
+                    Stamina -= DeltaStamina;
+                }
+                SetMovementStatus(EMovementStatus::EMS_Sprinting);
+            }
+            else // shift key up
+            {
+                if (Stamina + DeltaStamina >= MaxStamina)
+                {
+                    Stamina = MaxStamina;
+                }
+                else
+                {
+                    Stamina += DeltaStamina;
+                }
+                SetMovementStatus(EMovementStatus::EMS_Normal);
+            }
+            break;
+        case EStaminaStatus::ESS_BelowMinimum:
+            if (bShiftKeyDown)
+            {
+                if (Stamina - DeltaStamina <= 0)
+                {
+                    SetStaminaStatus(EStaminaStatus::ESS_Exhausted);
+                    SetMovementStatus(EMovementStatus::EMS_Normal);
+                    Stamina = 0;
+                }
+                else
+                {
+                    Stamina -=DeltaStamina;
+                    SetMovementStatus(EMovementStatus::EMS_Sprinting);
+                }
+            }
+            else //shift key up
+            {
+                if (Stamina + DeltaStamina >= MinSprintStamina)
+                {
+                    SetStaminaStatus(EStaminaStatus::ESS_Normal);
+                }
+                Stamina += DeltaStamina;
+                SetMovementStatus(EMovementStatus::EMS_Normal);
+            }
+            break;
+        case EStaminaStatus::ESS_Exhausted:
+            if (bShiftKeyDown)
+            {
+                Stamina = 0;
+            }
+            else // shift key up
+            {
+                SetStaminaStatus(EStaminaStatus::ESS_ExhaustedRecovering);
+                Stamina += DeltaStamina;
+            }
+            SetMovementStatus(EMovementStatus::EMS_Normal);
+            break;
+        case EStaminaStatus::ESS_ExhaustedRecovering:
+            if (Stamina + DeltaStamina >= MinSprintStamina)
+            {
+                SetStaminaStatus(EStaminaStatus::ESS_Normal);
+            }
+            Stamina += DeltaStamina;
+            SetMovementStatus(EMovementStatus::EMS_Normal);
+            break;
+        default:
+            ;
+    }
 }
 
 // Called to bind functionality to input
@@ -85,6 +178,9 @@ void AMain::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
     
     /** Here we're using a StopJu,pint Function inherited from character */
     PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+    
+    PlayerInputComponent->BindAction("Sprinting", IE_Pressed, this, &AMain::ShiftKeyDown);
+    PlayerInputComponent->BindAction("Sprinting", IE_Released, this, &AMain::ShiftKeyUp);
     
     PlayerInputComponent->BindAxis("MoveForward", this, &AMain::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &AMain::MoveRight);
@@ -145,7 +241,10 @@ void AMain::DecrementHealth(float Amount)
         Health -= Amount;
         Die();
     }
-    Health -= Amount;
+    else
+    {
+        Health -= Amount;
+    }
 }
 
 void AMain::IncrementCoins(int32 Amount)
@@ -156,4 +255,39 @@ void AMain::IncrementCoins(int32 Amount)
 void AMain::Die()
 {
     
+}
+
+
+void AMain::SetMovementStatus(EMovementStatus Status)
+{
+    MovementStatus = Status;
+    if (MovementStatus == EMovementStatus::EMS_Sprinting)
+    {
+        /** Here's how you  can change movement speed of a character */
+        GetCharacterMovement()->MaxWalkSpeed = SprintingSpeed;
+    }
+    else
+    {
+        GetCharacterMovement()->MaxWalkSpeed = RunningSpeed;
+    }
+}
+
+void AMain::ShiftKeyDown()
+{
+    bShiftKeyDown = true;
+    UE_LOG(LogTemp, Warning, TEXT("Shift Pressed"));
+}
+
+void AMain::ShiftKeyUp()
+{
+    bShiftKeyDown = false;
+    UE_LOG(LogTemp, Warning, TEXT("Shift Released"));
+}
+
+void AMain::ShowPickupLocations()
+{
+    for (FVector Location : PickupLocations)
+    {
+        UKismetSystemLibrary::DrawDebugSphere(this, Location, 25.f, 12, FLinearColor::Red, 10.f, 2.f);
+    }
 }
