@@ -20,6 +20,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
     float Damage;
     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
+    TSubclassOf<UDamageType> DamageTypeClass;
+    
     /** When we're overriding functions that were marked UFUNCTION() in the parent class we don't need to use this macro here
      it is inherited */
     

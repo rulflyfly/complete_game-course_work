@@ -26,14 +26,14 @@ ACollider::ACollider()
     MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
     MeshComponent->SetupAttachment(GetRootComponent());
     
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
+    //static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshComponentAsset(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere'"));
     
-    if (MeshComponentAsset.Succeeded())
-    {
-        MeshComponent->SetStaticMesh(MeshComponentAsset.Object);
-        MeshComponent->SetRelativeLocation(FVector(0.f, 0.f, -40.f));
-        MeshComponent->SetWorldScale3D(FVector(.8f, .8f, .8f));
-    }
+//    if (MeshComponentAsset.Succeeded())
+//    {
+//        MeshComponent->SetStaticMesh(MeshComponentAsset.Object);
+//        MeshComponent->SetRelativeLocation(FVector(0.f, 0.f, -40.f));
+//        MeshComponent->SetWorldScale3D(FVector(.8f, .8f, .8f));
+//    }
     
     SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
     SpringArm->SetupAttachment(GetRootComponent());
